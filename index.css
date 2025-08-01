@@ -1,28 +1,62 @@
+.warning-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px 10px; /* Increase gap to spread out boxes */
+  justify-content: center;
+  align-items: start;
+  width: 100%; /* Make container take full width */
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .warning {
-  border: 10px ridge #f00;
-  background-color: #ff0;
+  border: 2px solid #d32f2f;
+  background-color: #fff8e1;
   padding: 0.5rem;
-  display: align-items;
-  flex-direction: column;
+  display: flex;
+  flex-direction: column; /* Make content vertical in the box, not the boxes themselves*/
+  align-items: center;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(211, 47, 47, 0.08);
+  max-width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .warning img {
-  width: 100%;
-  shape-image-threshold: 0.5;
+  width: 80px;
+  height: 80px;
   object-fit: cover;
-  border-radius: 10px;
-  margin-bottom: 1rem;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12);
 }
 
 .warning p {
-  font: small-caps bold 1.2rem sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
   text-align: center;
+  color: #333;
+  margin: .3rem 0;
+  width: 250px;
 }
 
 .warning a {
-  color : #f00;
+  color: #d32f2f;
   text-decoration: none;
-  font-weight: bold;
+  font-weight: 500;
+  transition: color 0.2s;
 }
 
+.warning a:hover {
+  color: #b71c1c;
+}
+
+.form-control {
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}

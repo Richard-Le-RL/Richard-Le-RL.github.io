@@ -7,34 +7,49 @@
     p {text-align: center;}
     div {text-align: center;}
     nav {text-align: center}
+    a {
+      text-decoration: none;
+      font-weight: bold;
+    }
+    nav a {
+  font-weight: normal;
+  padding: 10px 5px;
+}
+
 </style>
 </head>
-<body>
+<body style = "background-color:rgb(248, 248, 240)">
 <link rel="stylesheet" href="index.css">
-<h1>Richard Le's Main Page</h1>
-<nav>
-  <a href ="index.html">HOME</a>
-  <a href ="about.html">ABOUT</a>
-  <a href ="contact.html">CONTACT</a>
-</nav>
+
+<div style="background-color: #e0e7ff; padding: 20px 0; width: 100vw; position: fixed; top: 0; left: 0; z-index: 1000;">
+  <h1 style="margin-top: 0;">Richard Le's Main Page</h1>
+  <nav>
+    <a href="index.html">HOME</a>
+    <a href="about.html">ABOUT</a>
+    <a href="contact.html">CONTACT</a>
+  </nav>
+</div>
+<div style="height: 120px;"></div> 
 <p>I'm Richard Le hosted with GitHub Pages.</p>
 
 <div class="warning">
   <img src="/images_music/UMass_Amherst.jpg" alt="UMass Amherst should be shown here">
-  <p>Beware the minuteman</p>
+  <p>Beware the minuteman for he is a minuteman minuteman IN A MINUTE hi hi hi hi hi hi hi hi hi hi hi hi hi</p>
   <a href = "https://www.umass.edu/" target="_blank">UMass Amherst</a>
 </div>
+<br>
 <div class = "warning">
   <img src="/images_music/malware.png" alt="malware should be shown here">
   <p>Malware!!</p>
   <a href = "https://en.wikipedia.org/wiki/Malware" target="_blank">Malware</a>
 </div>
+
 <div style="text-align: center">
-<audio controls autoplay loop hidden alt="Background Music">
+<!-- <audio controls autoplay loop hidden>
   <source src="/images_music/unreeeal_superhero_3.ogg" type="audio/ogg">
   <source src="/images_music/unreeeal_superhero_3.mp3" type="audio/mpeg">
 Your browser does not support the audio element.
-</audio>
+</audio> -->
 </div>
 </body>
 </html>
