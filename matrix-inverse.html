@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Inverse Matrix Calculator</title>
+  <style>
+    h1 {text-align: center;}
+    p {text-align: center;}
+    div {text-align: center;}
+    nav {text-align: center}
+    a {
+      text-decoration: none;
+      font-weight: bold;
+    }
+    nav a {
+      font-weight: normal;
+      padding: 10px 5px;
+    }
+
+</style>
+</head>
+<body style = "background-color:rgb(248, 248, 240)">
+<link rel="stylesheet" href="index.css">
+<div style="background-color: #e0e7ff; padding: 20px 0; width: 100vw; position: fixed; top: 0; left: 0; z-index: 1000;">
+  <h1 style="margin-top: 0;">Web Tools</h1>
+  <nav>
+    <a href="index.html">HOME</a>
+    <a href="about.html">ABOUT</a>
+    <a href="contact.html">CONTACT</a>
+    <a href="tools.html">TOOLS</a>
+  </nav>
+</div>
+<div style="height: 120px;"></div> 
+
+
+
+
+<div>
+    <h2>Matrix Inverse Calculator</h2>
+    <p>Enter a square matrix (comma separated, one row per line):</p>
+    <textarea id="matrixInput" rows="5" cols="40" placeholder="a,b,c&#10;d,e,f&#10;g,h,i"></textarea><br><br>
+    <button onclick="calculateInverse()">Calculate Inverse</button>
+    <h3>Inverse Matrix:</h3>
+    <pre id="result"></pre>  <!--This is where the result of the calculation will appear-->
+</div>
+
+<script>
+function parseMatrix(input) {
+    return input.trim().split('\n').map(row =>row.split(',').map(Number)); // Converts each row into an array of numbers
+    // The input is expected to be a string with rows separated by newlines
+    // and columns separated by commas. Each row is split into an array of numbers.
+    // The map(Number) converts each string to a number.
+    // If the input is not a valid matrix, it will throw an error when trying to
+    // convert strings to numbers.
+    // If the input is empty, it will return an empty array.
+    // If the input is not a valid matrix, it will throw an error when trying to
+    // convert strings to numbers.
+
+}
+
+function isSquare(matrix) {
+    return matrix.length > 0 && matrix.every(row => row.length === matrix.length); 
+    // a boolean result that makes sure the matrix is actually
+    // square (same number of rows and columns)
+    // by checking that every row has the same length as the number of rows
+}
+
+function matrixInverse(matrix) {
+    const n = matrix.length;
+    // Create augmented matrix [A | I]
+    let aug = matrix.map((row, i) =>
+        row.concat(Array.from({length: n}, (_, j) => (i === j ? 1 : 0)))
+    );
+
+    // Gauss-Jordan elimination
+    for (let i = 0; i < n; i++) {
+        // Find pivot
+        let maxRow = i;
+        for (let k = i + 1; k < n; k++) {
+            if (Math.abs(aug[k][i]) > Math.abs(aug[maxRow][i])) maxRow = k;
+        }
+        if (aug[maxRow][i] === 0) return null; // Singular matrix
+
+        // Swap rows
+        [aug[i], aug[maxRow]] = [aug[maxRow], aug[i]];
+
+        // Normalize pivot row
+        let pivot = aug[i][i];
+        for (let j = 0; j < 2 * n; j++) aug[i][j] /= pivot;
+
+        // Eliminate other rows
+        for (let k = 0; k < n; k++) {
+            if (k !== i) {
+                let factor = aug[k][i];
+                for (let j = 0; j < 2 * n; j++) {
+                    aug[k][j] -= factor * aug[i][j];
+                }
+            }
+        }
+    }
+
+    // Extract inverse matrix
+    return aug.map(row => row.slice(n));
+}
+
+function formatMatrix(matrix) {
+    return matrix.map(row => row.map(x => Number.isFinite(x) ? x.toFixed(4) : 'NaN').join('\t')).join('\n');
+}
+
+function matrixDeterminant(matrix) {
+    const n = matrix.length;
+    if (n === 1) return matrix[0][0];
+    if (n === 2) return matrix[0][0]*matrix[1][1] - matrix[0][1]*matrix[1][0];
+    let det = 0;
+    for (let col = 0; col < n; col++) {
+        // Build submatrix for minor
+        const subMatrix = matrix.slice(1).map(row => row.filter((_, j) => j !== col));
+        det += ((col % 2 === 0 ? 1 : -1) * matrix[0][col] * matrixDeterminant(subMatrix));
+    }
+    return det;
+}
+function calculateInverse() {
+    const input = document.getElementById('matrixInput').value;
+    let matrix;
+    try {
+        matrix = parseMatrix(input);
+        if (!isSquare(matrix)) throw new Error('Matrix must be square.');
+        const det = matrixDeterminant(matrix);
+        if (det === 0) throw new Error('Matrix is singular and cannot be inverted. det = 0');
+        const inv = matrixInverse(matrix);
+        if (!inv) throw new Error('Matrix is singular and cannot be inverted.');
+        document.getElementById('result').textContent = formatMatrix(inv) + `\n\nDeterminant: ${det.toFixed(4)}`;
+    } catch (e) {
+        document.getElementById('result').textContent = 'Error: ' + e.message;
+    }
+}
+</script>
