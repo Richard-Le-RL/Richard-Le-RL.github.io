@@ -104,6 +104,7 @@ function matrixInverse(matrix) {
 
 function formatMatrix(matrix) {
     return matrix.map(row => row.map(x => Number.isFinite(x) ? x.toFixed(4) : 'NaN').join('\t')).join('\n');
+    // This creates the matrix result, 
 }
 
 function matrixDeterminant(matrix) {
