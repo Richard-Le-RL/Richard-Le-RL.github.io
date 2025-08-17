@@ -9,9 +9,13 @@
     nav a { font-weight: normal; padding: 10px 5px; }
 
     .scroll-box {
-      width: 250px; height: 150px; overflow-y: scroll;
-      border: 2px solid #4f46e5; border-radius: 10px;
-      margin: 20px auto; padding: 10px; background-color: #f9fafb;
+      width: 200px;
+      height: 150px;
+      overflow-y: scroll;
+      border: 2px solid #4f46e5;
+      border-radius: 10px;
+      padding: 10px;
+      background-color: #f9fafb;
     }
     .scroll-box div { padding: 6px; cursor: pointer; border-radius: 6px; }
     .scroll-box div:hover { background-color: #e0e7ff; }
@@ -19,8 +23,24 @@
     .io-container { text-align: center; margin-top: 20px; }
     input { padding: 8px; font-size: 16px; width: 200px; margin: 10px; }
     output { display: block; margin-top: 15px; font-weight: bold; font-size: 18px; }
-    h2 { text-align: center; }
+    h2, h3 { text-align: center; }
     .mode-indicator { text-align: center; margin: 10px; font-weight: bold; }
+
+    .prefix-container {
+      display: flex;
+      justify-content: center;
+      gap: 50px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .input-unit-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body style="background-color:rgb(248, 248, 240)">
@@ -38,23 +58,28 @@
 
 <div style="height: 120px;"></div> 
 
-<h2>Input Value</h2>
-<div class="io-container">
+<h2>Input Value and Unit</h2>
+<div class="io-container input-unit-container">
   <input type="number" id="userInput" placeholder="Enter number">
-</div>
-
-<h2>Unit Name</h2>
-<div class="io-container">
   <input type="text" id="unitName" placeholder="Enter unit name (e.g., meters)">
 </div>
 
-<h2>Select Input Prefix</h2>
-<div class="scroll-box" id="inputPrefixList"></div>
-<div class="mode-indicator" id="inputMode">Input Mode: (base unit)</div>
+<h2>Select Prefixes</h2>
+<div class="prefix-container">
 
-<h2>Select Output Prefix (or Auto)</h2>
-<div class="scroll-box" id="outputPrefixList"></div>
-<div class="mode-indicator" id="outputMode">Output Mode: auto (engineering)</div>
+  <div>
+    <h3>Input Prefix</h3>
+    <div class="scroll-box" id="inputPrefixList"></div>
+    <div class="mode-indicator" id="inputMode">Input Mode: (base unit)</div>
+  </div>
+
+  <div>
+    <h3>Output Prefix</h3>
+    <div class="scroll-box" id="outputPrefixList"></div>
+    <div class="mode-indicator" id="outputMode">Output Mode: auto (engineering)</div>
+  </div>
+
+</div>
 
 <div class="io-container">
   <output id="result">Converted value: --</output>
@@ -82,7 +107,7 @@ const prefixes = [
 let inputPower = 0, inputSymbol = "";
 let outputPower = null, outputSymbol = "";
 
-// Build prefix list
+// Build prefix lists
 function buildPrefixList(containerId, modeId, callback, allowAuto=false){
   let container = document.getElementById(containerId);
   if(allowAuto){
@@ -125,7 +150,6 @@ function formatWithCommas(val){
     return val.toLocaleString(undefined, {maximumFractionDigits:6});
   }
 }
-
 function convert(){
   let value = parseFloat(document.getElementById("userInput").value);
   if(isNaN(value)){
@@ -139,7 +163,6 @@ function convert(){
   let finalValue, finalPrefix;
 
   if(outputPower===null){
-    // Auto: pick prefix so value is readable
     finalPrefix = prefixes[6]; // base unit
     let engValue = baseValue;
     prefixes.forEach(p=>{
@@ -161,6 +184,7 @@ function convert(){
 
   // Format numbers with commas
   let formattedValue = formatWithCommas(finalValue);
+  let formattedInput = formatWithCommas(value);
 
   // Engineering output same as plain English number
   let formattedEng = formattedValue + " " + outputUnit;
@@ -169,13 +193,13 @@ function convert(){
   let sciFormatted = baseValue.toExponential(6) + " " + unitName;
 
   // Plain English
-  let plain = `${value} ${inputUnit} is ${formattedValue} ${outputUnit}`;
+  let plain = `${formattedInput} ${inputUnit} is ${formattedValue} ${outputUnit}`;
 
   document.getElementById("result").textContent = `Engineering: ${formattedEng}`;
   document.getElementById("sciResult").textContent = `Scientific: ${sciFormatted}`;
   document.getElementById("plainResult").textContent = `Plain English: ${plain}`;
 }
-</script>
 
+</script>
 </body>
 </html>
