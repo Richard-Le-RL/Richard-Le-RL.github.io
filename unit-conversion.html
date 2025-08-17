@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Unit Conversions</title>
+  <style>
+    h1 {text-align: center;}
+    nav {text-align: center;}
+    a { text-decoration: none; font-weight: bold; }
+    nav a { font-weight: normal; padding: 10px 5px; }
+
+    .scroll-box {
+      width: 250px; height: 150px; overflow-y: scroll;
+      border: 2px solid #4f46e5; border-radius: 10px;
+      margin: 20px auto; padding: 10px; background-color: #f9fafb;
+    }
+    .scroll-box div { padding: 6px; cursor: pointer; border-radius: 6px; }
+    .scroll-box div:hover { background-color: #e0e7ff; }
+
+    .io-container { text-align: center; margin-top: 20px; }
+    input { padding: 8px; font-size: 16px; width: 200px; margin: 10px; }
+    output { display: block; margin-top: 15px; font-weight: bold; font-size: 18px; }
+    h2 { text-align: center; }
+    .mode-indicator { text-align: center; margin: 10px; font-weight: bold; }
+  </style>
+</head>
+<body style="background-color:rgb(248, 248, 240)">
+
+<div style="background-color: #e0e7ff; padding: 20px 0; width: 100vw; position: fixed; top: 0; left: 0; z-index: 1000;">
+  <h1 style="margin-top: 0;">Unit Conversions</h1>
+  <nav>
+    <a href="index.html">HOME</a>
+    <a href="about.html">ABOUT</a>
+    <a href="contact.html">CONTACT</a>
+    <a href="tools.html">TOOLS</a>
+    <a href="resume.html">RESUME</a>
+  </nav>
+</div>
+
+<div style="height: 120px;"></div> 
+
+<h2>Input Value</h2>
+<div class="io-container">
+  <input type="number" id="userInput" placeholder="Enter number">
+</div>
+
+<h2>Unit Name</h2>
+<div class="io-container">
+  <input type="text" id="unitName" placeholder="Enter unit name (e.g., meters)">
+</div>
+
+<h2>Select Input Prefix</h2>
+<div class="scroll-box" id="inputPrefixList"></div>
+<div class="mode-indicator" id="inputMode">Input Mode: (base unit)</div>
+
+<h2>Select Output Prefix (or Auto)</h2>
+<div class="scroll-box" id="outputPrefixList"></div>
+<div class="mode-indicator" id="outputMode">Output Mode: auto (engineering)</div>
+
+<div class="io-container">
+  <output id="result">Converted value: --</output>
+  <output id="sciResult"></output>
+  <output id="plainResult"></output>
+</div>
+
+<script>
+const prefixes = [
+  { name: "tera", symbol: "T", power: 12, fullName: "tera" },
+  { name: "giga", symbol: "G", power: 9, fullName: "giga" },
+  { name: "mega", symbol: "M", power: 6, fullName: "mega" },
+  { name: "kilo", symbol: "k", power: 3, fullName: "kilo" },
+  { name: "hecto", symbol: "h", power: 2, fullName: "hecto" },
+  { name: "deca", symbol: "da", power: 1, fullName: "deca" },
+  { name: "(base unit)", symbol: "", power: 0, fullName: "" },
+  { name: "deci", symbol: "d", power: -1, fullName: "deci" },
+  { name: "centi", symbol: "c", power: -2, fullName: "centi" },
+  { name: "milli", symbol: "m", power: -3, fullName: "milli" },
+  { name: "micro", symbol: "µ", power: -6, fullName: "micro" },
+  { name: "nano", symbol: "n", power: -9, fullName: "nano" },
+  { name: "pico", symbol: "p", power: -12, fullName: "pico" }
+];
+
+let inputPower = 0, inputSymbol = "";
+let outputPower = null, outputSymbol = "";
+
+// Build prefix list
+function buildPrefixList(containerId, modeId, callback, allowAuto=false){
+  let container = document.getElementById(containerId);
+  if(allowAuto){
+    let autoDiv = document.createElement("div");
+    autoDiv.innerHTML = "Auto (engineering)";
+    autoDiv.addEventListener("click", ()=>{
+      callback(null,"","auto"); 
+      document.getElementById(modeId).textContent = "Output Mode: auto (engineering)";
+      convert();
+    });
+    container.appendChild(autoDiv);
+  }
+  prefixes.forEach(p=>{
+    let div = document.createElement("div");
+    div.innerHTML = `${p.name} (${p.symbol || "—"}) — 10<sup>${p.power}</sup>`;
+    div.dataset.power = p.power;
+    div.dataset.symbol = p.symbol;
+    div.dataset.fullname = p.fullName;
+    div.addEventListener("click", function(){
+      callback(parseInt(this.dataset.power), this.dataset.symbol, this.dataset.fullname);
+      document.getElementById(modeId).textContent =
+        `${modeId.includes("input") ? "Input" : "Output"} Mode: ${p.name} (${p.symbol || "—"})`;
+      convert();
+    });
+    container.appendChild(div);
+  });
+}
+
+buildPrefixList("inputPrefixList","inputMode",(power,symbol,fullname)=>{ inputPower=power; inputSymbol=fullname; });
+buildPrefixList("outputPrefixList","outputMode",(power,symbol,fullname)=>{ outputPower=power; outputSymbol=fullname; },true);
+
+document.getElementById("userInput").addEventListener("input", convert);
+document.getElementById("unitName").addEventListener("input", convert);
+
+// Format number with commas, use scientific for very small/large
+function formatWithCommas(val){
+  if(Math.abs(val) < 1e-6 || Math.abs(val) > 1e6){
+    return val.toExponential(6);
+  } else {
+    return val.toLocaleString(undefined, {maximumFractionDigits:6});
+  }
+}
+
+function convert(){
+  let value = parseFloat(document.getElementById("userInput").value);
+  if(isNaN(value)){
+    document.getElementById("result").textContent = "Converted value: --";
+    document.getElementById("sciResult").textContent = "";
+    document.getElementById("plainResult").textContent = "";
+    return;
+  }
+
+  let baseValue = value * Math.pow(10, inputPower);
+  let finalValue, finalPrefix;
+
+  if(outputPower===null){
+    // Auto: pick prefix so value is readable
+    finalPrefix = prefixes[6]; // base unit
+    let engValue = baseValue;
+    prefixes.forEach(p=>{
+      let candidate = baseValue / Math.pow(10,p.power);
+      if(Math.abs(candidate)>=1 && Math.abs(candidate)<1000){
+        finalPrefix = p;
+        engValue = candidate;
+      }
+    });
+    finalValue = engValue;
+  } else {
+    finalPrefix = {power: outputPower, fullName: outputSymbol};
+    finalValue = baseValue / Math.pow(10, outputPower);
+  }
+
+  let unitName = document.getElementById("unitName").value || "unit";
+  let outputUnit = finalPrefix.fullName ? finalPrefix.fullName + " " + unitName : unitName;
+  let inputUnit = inputSymbol ? inputSymbol + " " + unitName : unitName;
+
+  // Format numbers with commas
+  let formattedValue = formatWithCommas(finalValue);
+
+  // Engineering output same as plain English number
+  let formattedEng = formattedValue + " " + outputUnit;
+
+  // Scientific output always in base units
+  let sciFormatted = baseValue.toExponential(6) + " " + unitName;
+
+  // Plain English
+  let plain = `${value} ${inputUnit} is ${formattedValue} ${outputUnit}`;
+
+  document.getElementById("result").textContent = `Engineering: ${formattedEng}`;
+  document.getElementById("sciResult").textContent = `Scientific: ${sciFormatted}`;
+  document.getElementById("plainResult").textContent = `Plain English: ${plain}`;
+}
+</script>
+
+</body>
+</html>
